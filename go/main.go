@@ -8,18 +8,26 @@ import (
 
 func main() {
 	store := wasmtime.NewStore(wasmtime.NewEngine())
-	module, err := wasmtime.NewModuleFromFile(store, "../hello.wat")
+	module, err := wasmtime.NewModuleFromFile(store, "../get_set.wat")
 	check(err)
 
-	set := wasmtime.WrapFunc(store, func(i int32) {
-		fmt.Println("set: ", i)
+	vals := map[int32]int32{}
+
+	set := wasmtime.WrapFunc(store, func(k, v int32) {
+		vals[k] = v
+		fmt.Printf("set: %d, %d\n", k, v)
 	})
 
-	get := wasmtime.WrapFunc(store, func(i int32) int32 {
-		return i * 2
+	get := wasmtime.WrapFunc(store, func(k int32) int32 {
+		fmt.Printf("get: %d\n", k)
+		return vals[k]
 	})
 
-	instance, err := wasmtime.NewInstance(module, []*wasmtime.Extern{set.AsExtern(), get.AsExtern()})
+	print := wasmtime.WrapFunc(store, func(k int32) {
+		fmt.Printf("print: %d\n", k)
+	})
+
+	instance, err := wasmtime.NewInstance(module, []*wasmtime.Extern{set.AsExtern(), get.AsExtern(), print.AsExtern()})
 	check(err)
 
 	run := instance.GetExport("run").Func()
