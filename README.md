@@ -22,3 +22,10 @@ cd python
 pip3 install wasmtime
 python3 main.py
 ```
+
+### C usage
+```
+cd c
+clang get_set.c -o get-set ./wasmtime-c-api/lib/libwasmtime.a -I./wasmtime-c-api/include/
+./get-set
+```
